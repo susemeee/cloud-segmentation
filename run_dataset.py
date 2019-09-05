@@ -12,9 +12,9 @@ gt_path = os.path.join(dataset_path, 'cloud_gt', 'masks')
 
 # shuffling
 SEED = 1234
-# SEE: Keras has an issue https://github.com/keras-team/keras-preprocessing/issues/236
-BATCH_SIZE = 1
-BUFFER_SIZE = 1000
+BATCH_SIZE = 16
+# 1600
+BUFFER_SIZE = 100
 
 genargs = dict(
     # featurewise_center=True,
@@ -34,23 +34,25 @@ genargs = dict(
 imagegen = ImageDataGenerator(**genargs, brightness_range=(0.975, 1.2,))
 maskgen = ImageDataGenerator(**genargs)
 
+# SEE: Keras has an issue https://github.com/keras-team/keras-preprocessing/issues/236
+K__BATCH_SIZE = 1
 image_generator = imagegen.flow_from_directory(cloud_path, shuffle=False, target_size=(320,240,),
-                                              class_mode=None, seed=SEED, batch_size=BATCH_SIZE,
+                                              class_mode=None, seed=SEED, batch_size=K__BATCH_SIZE,
                                               subset='training')
 mask_generator = maskgen.flow_from_directory(gt_path, shuffle=False, target_size=(320,240,),
-                                              class_mode=None, seed=SEED, batch_size=BATCH_SIZE,
+                                              class_mode=None, seed=SEED, batch_size=K__BATCH_SIZE,
                                               subset='training', color_mode='grayscale')
 image_val_generator = imagegen.flow_from_directory(cloud_path, shuffle=False, target_size=(320,240,),
-                                              class_mode=None, seed=SEED, batch_size=BATCH_SIZE,
+                                              class_mode=None, seed=SEED, batch_size=K__BATCH_SIZE,
                                               subset='validation')
 mask_val_generator = maskgen.flow_from_directory(gt_path, shuffle=False, target_size=(320,240,),
-                                              class_mode=None, seed=SEED, batch_size=BATCH_SIZE,
+                                              class_mode=None, seed=SEED, batch_size=K__BATCH_SIZE,
                                               subset='validation', color_mode='grayscale')
 
-image_dataset = tf.data.Dataset.from_generator(lambda: image_generator, tf.float32, tf.TensorShape([BATCH_SIZE, 320, 240, 3])).map(lambda t: tf.reshape(t, [320, 240, 3]))
-mask_dataset = tf.data.Dataset.from_generator(lambda: mask_generator, tf.float32, tf.TensorShape([BATCH_SIZE, 320, 240, 1])).map(lambda t: tf.reshape(t, [320, 240, 1]))
-image_val_dataset = tf.data.Dataset.from_generator(lambda: image_val_generator, tf.float32, tf.TensorShape([BATCH_SIZE, 320, 240, 3])).map(lambda t: tf.reshape(t, [320, 240, 3]))
-mask_val_dataset = tf.data.Dataset.from_generator(lambda: mask_val_generator, tf.float32, tf.TensorShape([BATCH_SIZE, 320, 240, 1])).map(lambda t: tf.reshape(t, [320, 240, 1]))
+image_dataset = tf.data.Dataset.from_generator(lambda: image_generator, tf.float32, tf.TensorShape([K__BATCH_SIZE, 320, 240, 3])).map(lambda t: tf.reshape(t, [320, 240, 3]))
+mask_dataset = tf.data.Dataset.from_generator(lambda: mask_generator, tf.float32, tf.TensorShape([K__BATCH_SIZE, 320, 240, 1])).map(lambda t: tf.reshape(t, [320, 240, 1]))
+image_val_dataset = tf.data.Dataset.from_generator(lambda: image_val_generator, tf.float32, tf.TensorShape([K__BATCH_SIZE, 320, 240, 3])).map(lambda t: tf.reshape(t, [320, 240, 3]))
+mask_val_dataset = tf.data.Dataset.from_generator(lambda: mask_val_generator, tf.float32, tf.TensorShape([K__BATCH_SIZE, 320, 240, 1])).map(lambda t: tf.reshape(t, [320, 240, 1]))
 
 train_dataset = tf.data.Dataset.zip((image_dataset, mask_dataset,)).batch(BATCH_SIZE).shuffle(BUFFER_SIZE)
 val_dataset = tf.data.Dataset.zip((image_val_dataset, mask_val_dataset,)).batch(BATCH_SIZE).shuffle(BUFFER_SIZE)
