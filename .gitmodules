@@ -1,0 +1,3 @@
+[submodule "deeplabv3"]
+	path = deeplabv3
+	url = https://github.com/bonlime/keras-deeplab-v3-plus.git
