@@ -15,7 +15,7 @@ mirrored_strategy = tf.distribute.MirroredStrategy(cross_device_ops=tf.distribut
 
 tensorboard_logger = tf.keras.callbacks.TensorBoard(log_dir=os.path.join('result', 'logdir'), histogram_freq=10, batch_size=BATCH_SIZE, write_graph=True, write_grads=True, write_images=True, update_freq='epoch')
 csv_logger = CSVLogger('./result/logs/logfile.txt')
-checkpointer = ModelCheckpoint(filepath='./result/resultnet.hdf5', save_best_only=True, monitor='val_loss')
+checkpointer = ModelCheckpoint(filepath='./result/cloudsegnet.hdf5', save_best_only=True, monitor='val_loss')
 
 with mirrored_strategy.scope():
     deeplab_model = Deeplabv3(weights=None, input_shape=(320, 240, 3), classes=2, activation='sigmoid')
@@ -33,4 +33,4 @@ with mirrored_strategy.scope():
 
 # eval
 print('\n# Evaluate')
-model.save(os.path.join(os.getcwd(), 'result', 'resultnet.model'))
+model.save(os.path.join(os.getcwd(), 'result', 'cloudsegnet.model'))

@@ -21,7 +21,7 @@ def preprocess_image(image):
      
 with CustomObjectScope({'relu6': relu6,'DepthwiseConv2D': tf.keras.layers.DepthwiseConv2D}):
 
-    model = load_model(os.path.join(os.getcwd(), 'result', 'resultnet.hdf5'), custom_objects={"tf": tf})
+    model = load_model(os.path.join(os.getcwd(), 'result', 'cloudsegnet.hdf5'), custom_objects={"tf": tf})
 
     image = tf.io.read_file(sys.argv[1])
     image = preprocess_image(image)
